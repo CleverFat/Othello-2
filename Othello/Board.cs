@@ -17,6 +17,8 @@ namespace Othello
     {
         public int size;
         public Colour[,] board;
+        List<Position> blackPositions;
+        List<Position> whitePositions;
         public List<Move> possibleMoves;
         
         /// <summary>
@@ -46,12 +48,75 @@ namespace Othello
                     if ((i + j) % 2 == 0)
                     {
                         board[j, i] = Colour.white;
+                        whitePositions.Add(new Position(j, i));
                     }
                     else
                     {
                         board[j, i] = Colour.black;
+                        blackPositions.Add(new Position(j, i));
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Finds all of the positions that the player with the colour defined can place a counter
+        /// </summary>
+        /// <param name="colour">The Colour of the player taking their turn</param>
+        /// <returns></returns>
+        List<Position> FindValidMoves(Colour colour)
+        {
+            List<Position> enemyPieces;
+            if (colour == Colour.black)
+            {
+                enemyPieces = whitePositions;
+            }
+            else if (colour == Colour.white)
+            {
+                enemyPieces = blackPositions;
+            }
+            else
+            {
+                throw new ArgumentException("colour cannot be none");
+            }
+
+            List<Position> possibleMoves = new List<Position>();
+            Dictionary<Position, Position> MoveDirections = new Dictionary<Position, Position>();
+
+            foreach(Position position in enemyPieces)
+            {
+                for (int i = -1; i < 1; i++)
+                {
+                    for (int j = -1; j < 1; j++)
+                    {
+                        if (board[position.x + j, position.y + i] == Colour.none)
+                        {
+                            Position possibleMove = new Position(position.x + j, position.y + i);
+                            MoveDirections.Add(possibleMove, new Position(j, i));
+                        }
+                    }
+                }
+            }
+
+            //TODO: check that the player will convert pieces if they place a counter here
+            foreach ()
+        }
+
+        bool CheckValidMove()
+        {
+
+        }
+
+        Colour Opposite(Colour colour)
+        {
+            switch (colour)
+            {
+                case Colour.white:
+                    return Colour.black;
+                case Colour.black:
+                    return Colour.white;
+                default:
+                    return Colour.none;
             }
         }
     }
