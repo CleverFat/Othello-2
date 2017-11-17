@@ -62,9 +62,9 @@ namespace Othello
         /// <summary>
         /// Finds all of the positions that the player with the colour defined can place a counter
         /// </summary>
-        /// <param name="colour">The Colour of the player taking their turn</param>
+        /// <param name="colour">The Colour of the player taking their turn. Must not be Colour.none</param>
         /// <returns></returns>
-        List<Position> FindValidMoves(Colour colour)
+        public List<Position> FindValidMoves(Colour colour)
         {
             List<Position> enemyPieces;
             if (colour == Colour.black)
@@ -92,19 +92,67 @@ namespace Othello
                         if (board[position.x + j, position.y + i] == Colour.none)
                         {
                             Position possibleMove = new Position(position.x + j, position.y + i);
-                            MoveDirections.Add(possibleMove, new Position(j, i));
+                            MoveDirections.Add(possibleMove, new Position(-j, -i));
                         }
                     }
                 }
             }
 
-            //TODO: check that the player will convert pieces if they place a counter here
-            foreach ()
+            //Key is the position of the counter to be placed.
+            //Value is the direction in which the enemy counters are that will be converted
+            foreach (KeyValuePair<Position, Position> moveDirection in MoveDirections)
+            {
+                if (CanConvertLine(moveDirection.Key.Add(moveDirection.Value), moveDirection.Value, colour))
+                {
+                    possibleMoves.Add(moveDirection.Key);
+                    //change so that possible moves contains class of moves
+                }
+            }
         }
 
-        bool CheckValidMove()
+        /// <summary>
+        /// Recursively calls to find whether or not a line of counters is present to be flipped
+        /// </summary>
+        /// <param name="startPosition"></param>
+        /// <param name="direction">Position with x and y between -1 and 1</param>
+        /// <param name="colour">Colour of the counters of the person taking their turn. Must be either Colour.black or Colour.white</param>
+        /// <returns></returns>
+        bool CanConvertLine(Position startPosition, Position direction, Colour colour)
         {
+            Position newPosition = startPosition.Add(direction);
+            if (OnBoard(newPosition))
+            {
+                if (board[newPosition.x, newPosition.y] == colour)
+                {
+                    return true;
+                }
+                else if (board[newPosition.x, newPosition.y] == Opposite(colour))
+                {
+                    return CanConvertLine(startPosition.Add(direction), direction, colour);
+                }
+                else //board[newPosition.x, newPosition.y] == Colour.empty
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
 
+        /// <summary>
+        /// Checks if the specified position is on the board.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns>True if position is on the board, else false</returns>
+        bool OnBoard(Position position)
+        {
+            if (position.x >= 0 &&
+                position.x < size &&
+                position.y >= 0 &&
+                position.y < size)
+            {
+                return true;
+            }
+            return false;
         }
 
         Colour Opposite(Colour colour)

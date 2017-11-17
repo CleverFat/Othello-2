@@ -15,5 +15,20 @@ namespace Othello
             this.x = x;
             this.y = y;
         }
+
+        /// <summary>
+        /// Adds the x and y coordinates of the position parameter to this Position.
+        /// </summary>
+        /// <param name="position"></param>
+        public Position Add(Position position)
+        {
+            return new Position(this.x + position.x, this.y + position.y);
+        }
+
+        public void AddToSelf(Position position)
+        {
+            this.x += position.x;
+            this.y += position.y;
+        }
     }
 }
