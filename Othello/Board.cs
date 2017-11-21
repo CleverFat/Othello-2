@@ -108,6 +108,8 @@ namespace Othello
                     //change so that possible moves contains class of moves
                 }
             }
+
+            return possibleMoves;
         }
 
         /// <summary>
