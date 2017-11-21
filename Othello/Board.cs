@@ -27,6 +27,8 @@ namespace Othello
         /// <param name="size">Must be even and >= 4</param>
         public Board(int size)
         {
+            blackPositions = new List<Position>();
+            whitePositions = new List<Position>();
             if (size % 2 == 1 || size < 4)
             {
                 throw new Exception("size must be an even integer >= 4");
@@ -43,7 +45,7 @@ namespace Othello
 
             for (int i = (size / 2) - 1; i <= size / 2; i++)
             {
-                for (int j = (size / 2) - 1; i <= size / 2; i++)
+                for (int j = (size / 2) - 1; j <= size / 2; j++)
                 {
                     if ((i + j) % 2 == 0)
                     {
@@ -67,17 +69,17 @@ namespace Othello
         public List<Position> FindValidMoves(Colour colour)
         {
             List<Position> enemyPieces;
-            if (colour == Colour.black)
+
+            switch (colour)
             {
-                enemyPieces = whitePositions;
-            }
-            else if (colour == Colour.white)
-            {
-                enemyPieces = blackPositions;
-            }
-            else
-            {
-                throw new ArgumentException("colour cannot be none");
+                case Colour.white:
+                    enemyPieces = blackPositions;
+                    break;
+                case Colour.black:
+                    enemyPieces = whitePositions;
+                    break;
+                default:
+                    throw new ArgumentException("Colour must be Colour.black or Colour.white");
             }
 
             List<Position> possibleMoves = new List<Position>();
