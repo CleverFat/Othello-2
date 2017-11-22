@@ -87,9 +87,9 @@ namespace Othello
 
             foreach(Position position in enemyPieces)
             {
-                for (int i = -1; i < 1; i++)
+                for (int i = -1; i <= 1; i++)
                 {
-                    for (int j = -1; j < 1; j++)
+                    for (int j = -1; j <= 1; j++)
                     {
                         if (board[position.x + j, position.y + i] == Colour.none)
                         {
