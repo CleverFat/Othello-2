@@ -159,6 +159,11 @@ namespace Othello
             return false;
         }
 
+        /// <summary>
+        /// Returns the enemy's colour given the current player's colour.
+        /// </summary>
+        /// <param name="colour"></param>
+        /// <returns></returns>
         Colour Opposite(Colour colour)
         {
             switch (colour)
