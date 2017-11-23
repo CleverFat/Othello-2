@@ -14,49 +14,11 @@ namespace Othello
             Board board = new Board(4);
             prog.PrintBoard(board);
 
-            board.board = new Colour[4, 4];
-            for (int i = 0; i < board.board.GetLength(0); i++)
+            Colour currentPlayer = Colour.white;
+            while (!prog.GameFinished(board, currentPlayer))
             {
-                for (int j = 0; j < board.board.GetLength(1); j++)
-                {
-                    board.board[j, i] = Colour.none;
-                }
-            }
+                List<Position> possibleMoves = board.FindValidMoves(currentPlayer);
 
-            board.board[0, 1] = Colour.white;
-            board.board[2, 1] = Colour.white;
-            board.board[1, 1] = Colour.black;
-
-            Console.WriteLine("POSSIBLE MOVES");
-            foreach (Position position in board.FindValidMoves(Colour.black))
-            {
-                for (int i = 0; i < board.board.GetLength(0); i++)
-                {
-                    for (int j = 0; j < board.board.GetLength(1); j++)
-                    {
-                        if (j == position.x && i == position.y)
-                        {
-                            Console.Write("x");
-                        }
-                        else
-                        {
-                            switch (board.board[j, i])
-                            {
-                                case Colour.white:
-                                    Console.Write("w");
-                                    break;
-                                case Colour.black:
-                                    Console.Write("b");
-                                    break;
-                                default:
-                                    Console.Write("-");
-                                    break;
-                            }
-                        }
-                    }
-                    Console.WriteLine();
-                }
-                Console.WriteLine();
             }
 
             Console.ReadLine();
@@ -82,6 +44,34 @@ namespace Othello
                     }
                 }
                 Console.WriteLine();
+            }
+        }
+
+        bool GameFinished(Board board, Colour currentPlayer)
+        {
+            bool boardFull = true;
+            for (int i = 0; i < board.board.GetLength(0); i++)
+            {
+                for (int j = 0; j < board.board.GetLength(1); j++)
+                {
+                    if (board.board[j, i] == Colour.none)
+                    {
+                        boardFull = false;
+                    }
+                }
+            }
+            if (boardFull)
+            {
+                return true;
+            }
+
+            if (board.FindValidMoves(currentPlayer).Count > 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
             }
         }
     }

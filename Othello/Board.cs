@@ -245,7 +245,7 @@ namespace Othello
         /// </summary>
         /// <param name="colour"></param>
         /// <returns></returns>
-        Colour Opposite(Colour colour)
+        public Colour Opposite(Colour colour)
         {
             switch (colour)
             {
