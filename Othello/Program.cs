@@ -12,7 +12,8 @@ namespace Othello
         {
             Program prog = new Program();
             Board board = new Board(4);
-            
+            prog.PrintBoard(board);
+
             board.board = new Colour[4, 4];
             for (int i = 0; i < board.board.GetLength(0); i++)
             {
@@ -22,15 +23,12 @@ namespace Othello
                 }
             }
 
-            board.board[0, 0] = Colour.black;
             board.board[0, 1] = Colour.white;
-            board.board[1, 2] = Colour.white;
-            board.board[2, 2] = Colour.black;
-            
-            prog.PrintBoard(board);
+            board.board[2, 1] = Colour.white;
+            board.board[1, 1] = Colour.black;
 
             Console.WriteLine("POSSIBLE MOVES");
-            foreach (Position position in board.FindValidMoves(Colour.white))
+            foreach (Position position in board.FindValidMoves(Colour.black))
             {
                 for (int i = 0; i < board.board.GetLength(0); i++)
                 {

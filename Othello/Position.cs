@@ -27,14 +27,21 @@ namespace Othello
         }
 
         /// <summary>
-        /// Adds the x and y coordinates of the position parameter to this object's x and y variables.
-        /// The result is stored in this object's x and y variables.
+        /// Checks if the Position parameter contains equivalent variables to this Position.
         /// </summary>
         /// <param name="position"></param>
-        public void AddToSelf(Position position)
+        /// <returns></returns>
+        public bool Equals(Position position)
         {
-            this.x += position.x;
-            this.y += position.y;
+            if (this.x == position.x &&
+                this.y == position.y)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
