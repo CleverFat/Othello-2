@@ -10,28 +10,55 @@ namespace Othello
     {
         static void Main(string[] args)
         {
-            const int BOARD_SIZE = 64;
+            const int BOARD_SIZE = 8;
+            bool gameFinished = false;
+            Colour currentPlayer = Colour.white;
             Program prog = new Program();
             Board board = new Board(BOARD_SIZE);
-            prog.PrintBoard(board);
             Random rnd = new Random();
-            Colour currentPlayer = Colour.white;
 
-            while (!prog.GameFinished(board, currentPlayer))
+            prog.PrintBoard(board);
+            Console.ReadLine();
+
+            while (!gameFinished)
             {
                 List<Position> possibleMoves = board.FindValidMoves(currentPlayer);
-                Position selectedPosition = possibleMoves[rnd.Next(possibleMoves.Count)];
-                board.MakeMove(selectedPosition, currentPlayer);
-                prog.PrintBoard(board);
-                Console.ReadLine();
+                if (possibleMoves.Count == 0)
+                {
+                    gameFinished = true;
+                }
+                else
+                {
+                    Position selectedPosition = possibleMoves[rnd.Next(possibleMoves.Count)];
+                    board.MakeMove(selectedPosition, currentPlayer);
+                    prog.PrintBoard(board);
+                    Console.ReadLine();
 
-                currentPlayer = board.Opposite(currentPlayer);
+                    currentPlayer = board.Opposite(currentPlayer);
+                }
             }
             Console.WriteLine("GAME FINISHED");
+
+            switch (prog.CheckWinner(board))
+            {
+                case Colour.white:
+                    Console.WriteLine("White won");
+                    break;
+                case Colour.black:
+                    Console.WriteLine("Black won");
+                    break;
+                default:
+                    Console.WriteLine("Draw");
+                    break;
+            }
 
             Console.ReadLine();
         }
 
+        /// <summary>
+        /// Prints board to console
+        /// </summary>
+        /// <param name="board"></param>
         void PrintBoard(Board board)
         {
             for (int i = 0; i < board.board.GetLength(0); i++)
@@ -55,24 +82,14 @@ namespace Othello
             }
         }
 
+        /// <summary>
+        /// Checks if there are no moves left for the current player to take
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="currentPlayer"></param>
+        /// <returns></returns>
         bool GameFinished(Board board, Colour currentPlayer)
         {
-            bool boardFull = true;
-            for (int i = 0; i < board.board.GetLength(0); i++)
-            {
-                for (int j = 0; j < board.board.GetLength(1); j++)
-                {
-                    if (board.board[j, i] == Colour.none)
-                    {
-                        boardFull = false;
-                    }
-                }
-            }
-            if (boardFull)
-            {
-                return true;
-            }
-
             if (board.FindValidMoves(currentPlayer).Count > 0)
             {
                 return false;
