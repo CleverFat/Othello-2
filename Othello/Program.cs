@@ -10,58 +10,55 @@ namespace Othello
     {
         static void Main(string[] args)
         {
+            const int BOARD_SIZE = 8;
+            bool gameFinished = false;
+            Colour currentPlayer = Colour.white;
             Program prog = new Program();
-            Board board = new Board(4);
-            prog.PrintBoard(board);
+            Board board = new Board(BOARD_SIZE);
+            Random rnd = new Random();
 
-            board.board = new Colour[4, 4];
-            for (int i = 0; i < board.board.GetLength(0); i++)
+            prog.PrintBoard(board);
+            Console.ReadLine();
+
+            while (!gameFinished)
             {
-                for (int j = 0; j < board.board.GetLength(1); j++)
+                List<Position> possibleMoves = board.FindValidMoves(currentPlayer);
+                if (possibleMoves.Count == 0)
                 {
-                    board.board[j, i] = Colour.none;
+                    gameFinished = true;
+                }
+                else
+                {
+                    Position selectedPosition = possibleMoves[rnd.Next(possibleMoves.Count)];
+                    board.MakeMove(selectedPosition, currentPlayer);
+                    prog.PrintBoard(board);
+                    Console.ReadLine();
+
+                    currentPlayer = board.Opposite(currentPlayer);
                 }
             }
+            Console.WriteLine("GAME FINISHED");
 
-            board.board[0, 1] = Colour.white;
-            board.board[2, 1] = Colour.white;
-            board.board[1, 1] = Colour.black;
-
-            Console.WriteLine("POSSIBLE MOVES");
-            foreach (Position position in board.FindValidMoves(Colour.black))
+            switch (prog.CheckWinner(board))
             {
-                for (int i = 0; i < board.board.GetLength(0); i++)
-                {
-                    for (int j = 0; j < board.board.GetLength(1); j++)
-                    {
-                        if (j == position.x && i == position.y)
-                        {
-                            Console.Write("x");
-                        }
-                        else
-                        {
-                            switch (board.board[j, i])
-                            {
-                                case Colour.white:
-                                    Console.Write("w");
-                                    break;
-                                case Colour.black:
-                                    Console.Write("b");
-                                    break;
-                                default:
-                                    Console.Write("-");
-                                    break;
-                            }
-                        }
-                    }
-                    Console.WriteLine();
-                }
-                Console.WriteLine();
+                case Colour.white:
+                    Console.WriteLine("White won");
+                    break;
+                case Colour.black:
+                    Console.WriteLine("Black won");
+                    break;
+                default:
+                    Console.WriteLine("Draw");
+                    break;
             }
 
             Console.ReadLine();
         }
 
+        /// <summary>
+        /// Prints board to console
+        /// </summary>
+        /// <param name="board"></param>
         void PrintBoard(Board board)
         {
             for (int i = 0; i < board.board.GetLength(0); i++)
@@ -82,6 +79,64 @@ namespace Othello
                     }
                 }
                 Console.WriteLine();
+            }
+        }
+
+        /// <summary>
+        /// Checks if there are no moves left for the current player to take
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="currentPlayer"></param>
+        /// <returns></returns>
+        bool GameFinished(Board board, Colour currentPlayer)
+        {
+            if (board.FindValidMoves(currentPlayer).Count > 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Counts the number of pieces of each colour on the board to determine who won
+        /// </summary>
+        /// <param name="board"></param>
+        /// <returns>Returns Colour.white if white won, Colour.black if black won and Colour.none if the game resulted in a draw</returns>
+        Colour CheckWinner(Board board)
+        {
+            int whiteCount = 0;
+            int blackCount = 0;
+            for (int i = 0; i < board.board.GetLength(0); i++)
+            {
+                for (int j = 0; j < board.board.GetLength(1); j++)
+                {
+                    switch (board.board[j, i])
+                    {
+                        case Colour.white:
+                            whiteCount++;
+                            break;
+                        case Colour.black:
+                            blackCount++;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            if (whiteCount > blackCount)
+            {
+                return Colour.white;
+            }
+            else if (blackCount > whiteCount)
+            {
+                return Colour.black;
+            }
+            else
+            {
+                return Colour.none;
             }
         }
     }

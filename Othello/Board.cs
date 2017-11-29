@@ -245,7 +245,7 @@ namespace Othello
         /// </summary>
         /// <param name="colour"></param>
         /// <returns></returns>
-        Colour Opposite(Colour colour)
+        public Colour Opposite(Colour colour)
         {
             switch (colour)
             {
@@ -255,6 +255,83 @@ namespace Othello
                     return Colour.white;
                 default:
                     return Colour.none;
+            }
+        }
+
+        /// <summary>
+        /// Places a counter on the board in the specified Position and flips all of the lines of enemy pieces which are sandwiched by
+        /// this piece and another of the player's colour.
+        /// </summary>
+        /// <param name="position">Position of the counter being placed</param>
+        /// <param name="playerColour">Colour of the counter being placed</param>
+        public void MakeMove(Position position, Colour playerColour)
+        {
+            foreach (Position counter in GetFlippedCounters(position, playerColour))
+            {
+                board[counter.x, counter.y] = playerColour;
+            }
+            board[position.x, position.y] = playerColour;
+        }
+
+        /// <summary>
+        /// Checks surrounding squares to find lines of enemy pieces.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="playerColour"></param>
+        /// <returns>A list containing all enemy pieces which require flipping</returns>
+        List<Position> GetFlippedCounters(Position position, Colour playerColour)
+        {
+            List<Position> allFlippedCounters = new List<Position>();
+            for (int i = -1; i <= 1; i++)
+            {
+                for (int j = -1; j <= 1; j++)
+                {
+                    if (i != 0 || j != 0)
+                    {
+                        List<Position> tempFlippedCounters = FindFlippedCounters(position, new Position(j, i), playerColour);
+                        if (tempFlippedCounters != null)
+                        {
+                            foreach (Position flippedCounter in FindFlippedCounters(position, new Position(j, i), playerColour))
+                            {
+                                allFlippedCounters.Add(flippedCounter);
+                            }
+                        }
+                    }
+                }
+            }
+            return allFlippedCounters;
+        }
+
+        /// <summary>
+        /// Recursively calls itself to find a line of enemy pieces ending with a piece of the player's colour.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="direction"></param>
+        /// <param name="playerColour"></param>
+        /// <returns></returns>
+        List<Position> FindFlippedCounters(Position position, Position direction, Colour playerColour)
+        {
+            Position nextPosition = position.Add(direction);
+            if (!OnBoard(nextPosition))
+            {
+                return null;
+            }
+            else if (board[nextPosition.x, nextPosition.y] == playerColour)
+            {
+                return new List<Position>();
+            }
+            else if (board[nextPosition.x, nextPosition.y] == Colour.none)
+            {
+                return null;
+            }
+            else //if (board[nextPosition.x, nextPosition.y] == Opposite(playerColour))
+            {
+                List<Position> flippedCounters = FindFlippedCounters(nextPosition, direction, playerColour);
+                if (flippedCounters != null)
+                {
+                    flippedCounters.Add(nextPosition);
+                }
+                return flippedCounters;
             }
         }
     }

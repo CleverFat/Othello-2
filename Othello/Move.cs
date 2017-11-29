@@ -15,6 +15,19 @@ namespace Othello
 
     class Move
     {
+        public Position movePosition;
+        public List<Position> flippedPieces;
+
+        public Move(Position movePosition, List<Position> flippedPieces)
+        {
+            this.movePosition = movePosition;
+            this.flippedPieces = flippedPieces;
+        }
+    }
+
+
+    /*class Move
+    {
         Position position;
         List<Position> flippedCounters;     //Enemy's counters which are to be flipped in this move.
         List<Line> lines;
@@ -49,5 +62,5 @@ namespace Othello
             }
             this.q = reward;
         }
-    }
+    }*/
 }
