@@ -10,49 +10,54 @@ namespace Othello
     {
         static void Main(string[] args)
         {
-            const int BOARD_SIZE = 8;
-            bool gameFinished = false;
-            Colour currentPlayer = Colour.white;
-            Program prog = new Program();
-            Board board = new Board(BOARD_SIZE);
-            Random rnd = new Random();
-
-            prog.PrintBoard(board);
-            Console.ReadLine();
-
-            while (!gameFinished)
+            while (true)
             {
-                List<Position> possibleMoves = board.FindValidMoves(currentPlayer);
-                if (possibleMoves.Count == 0)
+                const int BOARD_SIZE = 64;
+                bool gameFinished = false;
+                Colour currentPlayer = Colour.white;
+                Program prog = new Program();
+                Board board = new Board(BOARD_SIZE);
+                Random rnd = new Random();
+
+                //prog.PrintBoard(board);
+                //Console.ReadLine();
+
+                while (!gameFinished)
                 {
-                    gameFinished = true;
+                    //List<Position> possibleMoves = board.FindValidMoves(currentPlayer);
+                    List<Move> possibleMoves = board.FindValidMoves(currentPlayer);
+                    if (possibleMoves.Count == 0)
+                    {
+                        gameFinished = true;
+                    }
+                    else
+                    {
+                        Move selectedMove = possibleMoves[rnd.Next(possibleMoves.Count)];
+                        board.MakeMove(selectedMove, currentPlayer);
+                        //prog.PrintBoard(board);
+                        //Console.ReadLine();
+
+                        currentPlayer = board.Opposite(currentPlayer);
+                    }
                 }
-                else
+                Console.WriteLine("GAME FINISHED");
+                prog.PrintBoard(board);
+
+                switch (prog.CheckWinner(board))
                 {
-                    Position selectedPosition = possibleMoves[rnd.Next(possibleMoves.Count)];
-                    board.MakeMove(selectedPosition, currentPlayer);
-                    prog.PrintBoard(board);
-                    Console.ReadLine();
-
-                    currentPlayer = board.Opposite(currentPlayer);
+                    case Colour.white:
+                        Console.WriteLine("White won");
+                        break;
+                    case Colour.black:
+                        Console.WriteLine("Black won");
+                        break;
+                    default:
+                        Console.WriteLine("Draw");
+                        break;
                 }
-            }
-            Console.WriteLine("GAME FINISHED");
 
-            switch (prog.CheckWinner(board))
-            {
-                case Colour.white:
-                    Console.WriteLine("White won");
-                    break;
-                case Colour.black:
-                    Console.WriteLine("Black won");
-                    break;
-                default:
-                    Console.WriteLine("Draw");
-                    break;
+                Console.ReadLine();
             }
-
-            Console.ReadLine();
         }
 
         /// <summary>
@@ -68,13 +73,13 @@ namespace Othello
                     switch (board.board[j, i])
                     {
                         case Colour.white:
-                            Console.Write("w");
+                            Console.Write("|");
                             break;
                         case Colour.black:
-                            Console.Write("b");
+                            Console.Write("-");
                             break;
                         default:
-                            Console.Write("-");
+                            Console.Write(" ");
                             break;
                     }
                 }

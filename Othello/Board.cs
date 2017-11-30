@@ -62,7 +62,7 @@ namespace Othello
         /// </summary>
         /// <param name="playerColour"></param>
         /// <returns></returns>
-        public List<Position> FindValidMoves(Colour playerColour)
+        public List<Move> FindValidMoves(Colour playerColour)
         {
             if (playerColour == Colour.none)
             {
@@ -82,20 +82,44 @@ namespace Othello
                 }
             }
 
-            List<Position> validMoves = new List<Position>();
+            List<Move> validMoves = new List<Move>();
 
             foreach (Position playerCounter in playerCounters)
             {
-                List<Position> currentCounterMoves = CheckSurroundingSquares(playerCounter, playerColour, Opposite(playerColour));
-                foreach (Position possibleMove in currentCounterMoves)
+                List<Move> currentCounterMoves = CheckSurroundingSquares(playerCounter, playerColour, Opposite(playerColour));
+                validMoves = AddToValidMoves(validMoves, currentCounterMoves);                
+            }
+            return validMoves;
+        }
+
+        /// <summary>
+        /// Goes through newMoves. If the position is already in validMoves, the function only adds the flippedPositions 
+        /// to the move with the same movePosition. Otherwise, it will add the move to the list, and return it.
+        /// </summary>
+        /// <param name="validMoves"></param>
+        /// <param name="newMoves"></param>
+        /// <returns></returns>
+        List<Move> AddToValidMoves(List<Move> validMoves, List<Move> newMoves)
+        {
+            foreach (Move move in newMoves)
+            {
+                bool inValidMoves = false;
+                for (int i = 0; i < validMoves.Count; i++)
                 {
-                    if (!ListContains(validMoves, possibleMove))
+                    if (validMoves[i].movePosition.Equals(move.movePosition))
                     {
-                        validMoves.Add(possibleMove);
+                        inValidMoves = true;
+                        foreach (Position flippedCounter in move.flippedPieces)
+                        {
+                            validMoves[i].flippedPieces.Add(flippedCounter);
+                        }
                     }
                 }
+                if (!inValidMoves)
+                {
+                    validMoves.Add(move);
+                }
             }
-            
             return validMoves;
         }
 
@@ -116,6 +140,18 @@ namespace Othello
             return false;
         }
 
+        bool ListContains(List<Move> moves, Move move)
+        {
+            for (int i = 0; i < moves.Count; i++)
+            {
+                if (moves[i].movePosition.Equals(move.movePosition))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Loops through the squares surrounding the Position of the counter that is passed in and checks if there is a line of the 
         /// enemy's colour with an empty space at the end.
@@ -124,21 +160,21 @@ namespace Othello
         /// <param name="playerColour"></param>
         /// <param name="enemyColour"></param>
         /// <returns></returns>
-        List<Position> CheckSurroundingSquares(Position counterPosition, Colour playerColour, Colour enemyColour)
+        List<Move> CheckSurroundingSquares(Position counterPosition, Colour playerColour, Colour enemyColour)
         {
-            List<Position> movePositions = new List<Position>();
+            List<Move> possibleMoves = new List<Move>();
             for (int i = -1; i <= 1; i++)
             {
                 for (int j = -1; j <= 1; j++)
                 {
-                    Position possibleMove = CheckMove(counterPosition, new Position(j, i), playerColour, enemyColour);
+                    Move possibleMove = CheckMove(counterPosition, new Position(j, i), playerColour, enemyColour);
                     if (possibleMove != null)
                     {
-                        movePositions.Add(possibleMove);
+                        possibleMoves.Add(possibleMove);
                     }
                 }
             }
-            return movePositions;
+            return possibleMoves;
         }
 
         /// <summary>
@@ -148,8 +184,9 @@ namespace Othello
         /// <param name="direction">Position with maximum size of 1 which sets the direction to convert</param>
         /// <param name="playerColour"></param>
         /// <returns>True if there is a line that the player can convert, otherwise false.</returns>
-        Position CheckMove(Position counterPosition, Position direction, Colour playerColour, Colour enemyColour)
+        Move CheckMove(Position counterPosition, Position direction, Colour playerColour, Colour enemyColour)
         {
+            Move move = new Move(new List<Position>());
             Position nextPosition = counterPosition.Add(direction);
             if (!OnBoard(nextPosition))
             {
@@ -157,7 +194,8 @@ namespace Othello
             }
             else if (board[nextPosition.x, nextPosition.y] == enemyColour)
             {
-                return FindLineRecursively(nextPosition, direction, playerColour, enemyColour);
+                move.flippedPieces.Add(nextPosition);
+                return FindLineRecursively(nextPosition, direction, playerColour, enemyColour, move);
             }
             else
             {
@@ -173,21 +211,27 @@ namespace Othello
         /// <param name="direction"></param>
         /// <param name="playerColour"></param>
         /// <param name="enemyColour"></param>
+        /// <param name="move">The move parameter that will be returned. Each enemy position is added to the flippedCounter list until the
+        /// method reaches the end of the line of enemy counters</param>
         /// <returns></returns>
-        Position FindLineRecursively(Position currentPosition, Position direction, Colour playerColour, Colour enemyColour)
+        Move FindLineRecursively(Position currentPosition, Position direction, Colour playerColour, Colour enemyColour, Move move)
         {
             Position nextPosition = currentPosition.Add(direction);
-            if (!OnBoard(nextPosition))
+            if (!OnBoard(nextPosition))                                     //cannot convert line - hit the edge of the board
             {
                 return null;
             }
-            else if (board[nextPosition.x, nextPosition.y] == enemyColour)
+            else if (board[nextPosition.x, nextPosition.y] == enemyColour)  //There are still pieces left in the line to check
             {
-                return FindLineRecursively(nextPosition, direction, playerColour, enemyColour);
+                //flippedPieces.Add(nextPosition);
+                move.flippedPieces.Add(nextPosition);
+                return FindLineRecursively(nextPosition, direction, playerColour, enemyColour, move);
             }
-            else if (board[nextPosition.x, nextPosition.y] == Colour.none)
+            else if (board[nextPosition.x, nextPosition.y] == Colour.none)  //reached the end of the line
             {
-                return nextPosition;
+                move.movePosition = nextPosition;
+                return move;
+                //return nextPosition;
             }
             else
             {
@@ -259,80 +303,18 @@ namespace Othello
         }
 
         /// <summary>
-        /// Places a counter on the board in the specified Position and flips all of the lines of enemy pieces which are sandwiched by
-        /// this piece and another of the player's colour.
+        /// Places a counter in the position of the move.movePosition and flips all of the pieces in the move.flippedPieces to 
+        /// the player's colour.
         /// </summary>
-        /// <param name="position">Position of the counter being placed</param>
-        /// <param name="playerColour">Colour of the counter being placed</param>
-        public void MakeMove(Position position, Colour playerColour)
+        /// <param name="move"></param>
+        /// <param name="playerColour"></param>
+        public void MakeMove(Move move, Colour playerColour)
         {
-            foreach (Position counter in GetFlippedCounters(position, playerColour))
+            foreach (Position counter in move.flippedPieces)
             {
                 board[counter.x, counter.y] = playerColour;
             }
-            board[position.x, position.y] = playerColour;
-        }
-
-        /// <summary>
-        /// Checks surrounding squares to find lines of enemy pieces.
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="playerColour"></param>
-        /// <returns>A list containing all enemy pieces which require flipping</returns>
-        List<Position> GetFlippedCounters(Position position, Colour playerColour)
-        {
-            List<Position> allFlippedCounters = new List<Position>();
-            for (int i = -1; i <= 1; i++)
-            {
-                for (int j = -1; j <= 1; j++)
-                {
-                    if (i != 0 || j != 0)
-                    {
-                        List<Position> tempFlippedCounters = FindFlippedCounters(position, new Position(j, i), playerColour);
-                        if (tempFlippedCounters != null)
-                        {
-                            foreach (Position flippedCounter in FindFlippedCounters(position, new Position(j, i), playerColour))
-                            {
-                                allFlippedCounters.Add(flippedCounter);
-                            }
-                        }
-                    }
-                }
-            }
-            return allFlippedCounters;
-        }
-
-        /// <summary>
-        /// Recursively calls itself to find a line of enemy pieces ending with a piece of the player's colour.
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="direction"></param>
-        /// <param name="playerColour"></param>
-        /// <returns></returns>
-        List<Position> FindFlippedCounters(Position position, Position direction, Colour playerColour)
-        {
-            Position nextPosition = position.Add(direction);
-            if (!OnBoard(nextPosition))
-            {
-                return null;
-            }
-            else if (board[nextPosition.x, nextPosition.y] == playerColour)
-            {
-                return new List<Position>();
-            }
-            else if (board[nextPosition.x, nextPosition.y] == Colour.none)
-            {
-                return null;
-            }
-            else //if (board[nextPosition.x, nextPosition.y] == Opposite(playerColour))
-            {
-                List<Position> flippedCounters = FindFlippedCounters(nextPosition, direction, playerColour);
-                if (flippedCounters != null)
-                {
-                    flippedCounters.Add(nextPosition);
-                }
-                return flippedCounters;
-            }
+            board[move.movePosition.x, move.movePosition.y] = playerColour;
         }
     }
 }
