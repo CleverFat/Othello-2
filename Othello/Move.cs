@@ -23,6 +23,25 @@ namespace Othello
             this.movePosition = movePosition;
             this.flippedPieces = flippedPieces;
         }
+
+        public Move(List<Position> flippedPieces)
+        {
+            this.flippedPieces = flippedPieces;
+        }
+
+        public Move AddFlippedPieces(Move move)
+        {
+            List<Position> combinedPositions = new List<Position>();
+            foreach (Position position in this.flippedPieces)
+            {
+                combinedPositions.Add(position);
+            }
+            foreach (Position position in move.flippedPieces)
+            {
+                combinedPositions.Add(position);
+            }
+            return new Move(this.movePosition, combinedPositions);
+        }
     }
 
 
