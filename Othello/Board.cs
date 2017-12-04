@@ -17,7 +17,6 @@ namespace Othello
     {
         public int size;
         public Colour[,] board;
-        public List<Move> possibleMoves;
         
         /// <summary>
         /// Board containing 2-dimensional array of counters

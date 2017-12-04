@@ -56,7 +56,7 @@ namespace Othello
                         break;
                 }
 
-                Console.ReadLine();
+                //Console.ReadLine();
             }
         }
 
